@@ -1,0 +1,14 @@
+metadata:
+  name: rpc_server_duration_count_slo
+spec:
+  target: '99'
+  window: 30d
+  indicator:
+    ratio:
+      errors:
+        metric: rpc_server_duration_count{rpc_connect_rpc_error!=""}
+      total:
+        metric: rpc_server_duration_count
+      grouping:
+        - rpc_service
+        - rpc_method

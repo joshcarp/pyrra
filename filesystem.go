@@ -305,6 +305,10 @@ func writeRuleFile(logger log.Logger, file, prometheusFolder string, genericRule
 	if err != nil {
 		return fmt.Errorf("failed to get increase rules: %w", err)
 	}
+	grafanaDashboard, err := objective.GrafanaDashboards()
+	if err := os.WriteFile("grafana-dashboard.json", []byte(grafanaDashboard), 0644); err != nil {
+		return fmt.Errorf("failed to write grafana dashboard: %w", err)
+	}
 
 	burnrates, err := objective.Burnrates()
 	if err != nil {
@@ -363,6 +367,18 @@ func writeRuleFile(logger log.Logger, file, prometheusFolder string, genericRule
 	}
 	return nil
 }
+
+/*
+local pyrra_objective = std.filter(function(x) x.record == "pyrra_objective", generic_rules)[0].expr,
+local pyrra_window = std.filter(function(x) x.record == "pyrra_window", generic_rules)[0].expr,
+local pyrra_availability = std.filter(function(x) x.record == "pyrra_availability", generic_rules)[0].expr,
+local pyrra_requests_total = std.filter(function(x) x.record == "pyrra_requests_total", generic_rules)[0].expr,
+local pyrra_errors_total = std.filter(function(x) x.record == "pyrra_errors_total", generic_rules)[0].expr,
+local title = obj.slo,
+local uid = obj.slo,
+local availability_expr = "(("+pyrra_availability+" - "+pyrra_objective+")) / (1 - "+pyrra_objective+")",
+
+*/
 
 func objectiveFromFile(file string) (v1alpha1.ServiceLevelObjective, slo.Objective, error) {
 	bytes, err := os.ReadFile(file)

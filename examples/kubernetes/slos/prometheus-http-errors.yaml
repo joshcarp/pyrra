@@ -5,14 +5,15 @@ metadata:
     prometheus: k8s
     role: alert-rules
   name: prometheus-http-errors
-  namespace: monitoring
+  namespace: observability
 spec:
   description: ""
   indicator:
-    ratio:
-      errors:
-        metric: prometheus_http_requests_total{job="prometheus-k8s",code=~"5.."}
+    latency:
+      success:
+        metric: http_server_duration_bucket{le="0.032", http_status_code=~"4.."}
       total:
-        metric: prometheus_http_requests_total{job="prometheus-k8s"}
-  target: "99.99"
+        metric: http_server_duration_count
+  target: "99.9"
   window: 2w
+

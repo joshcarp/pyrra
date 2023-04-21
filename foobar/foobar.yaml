@@ -1,0 +1,92 @@
+groups:
+- interval: 2m30s
+  name: rpc_server_duration_count_slo-increase
+  rules:
+  - expr: sum by (rpc_connect_rpc_error, rpc_method, rpc_service) (increase(rpc_server_duration_count[30d]))
+    labels:
+      slo: rpc_server_duration_count_slo
+    record: rpc_server_duration:increase30d
+  - alert: SLOMetricAbsent
+    expr: absent(rpc_server_duration_count) == 1
+    for: 2m
+    labels:
+      severity: critical
+      slo: rpc_server_duration_count_slo
+- interval: 30s
+  name: rpc_server_duration_count_slo
+  rules:
+  - expr: sum by (rpc_method, rpc_service) (rate(rpc_server_duration_count{rpc_connect_rpc_error!=""}[5m]))
+      / sum by (rpc_method, rpc_service) (rate(rpc_server_duration_count[5m]))
+    labels:
+      slo: rpc_server_duration_count_slo
+    record: rpc_server_duration:burnrate5m
+  - expr: sum by (rpc_method, rpc_service) (rate(rpc_server_duration_count{rpc_connect_rpc_error!=""}[32m]))
+      / sum by (rpc_method, rpc_service) (rate(rpc_server_duration_count[32m]))
+    labels:
+      slo: rpc_server_duration_count_slo
+    record: rpc_server_duration:burnrate32m
+  - expr: sum by (rpc_method, rpc_service) (rate(rpc_server_duration_count{rpc_connect_rpc_error!=""}[1h4m]))
+      / sum by (rpc_method, rpc_service) (rate(rpc_server_duration_count[1h4m]))
+    labels:
+      slo: rpc_server_duration_count_slo
+    record: rpc_server_duration:burnrate1h4m
+  - expr: sum by (rpc_method, rpc_service) (rate(rpc_server_duration_count{rpc_connect_rpc_error!=""}[2h9m]))
+      / sum by (rpc_method, rpc_service) (rate(rpc_server_duration_count[2h9m]))
+    labels:
+      slo: rpc_server_duration_count_slo
+    record: rpc_server_duration:burnrate2h9m
+  - expr: sum by (rpc_method, rpc_service) (rate(rpc_server_duration_count{rpc_connect_rpc_error!=""}[6h26m]))
+      / sum by (rpc_method, rpc_service) (rate(rpc_server_duration_count[6h26m]))
+    labels:
+      slo: rpc_server_duration_count_slo
+    record: rpc_server_duration:burnrate6h26m
+  - expr: sum by (rpc_method, rpc_service) (rate(rpc_server_duration_count{rpc_connect_rpc_error!=""}[1d1h43m]))
+      / sum by (rpc_method, rpc_service) (rate(rpc_server_duration_count[1d1h43m]))
+    labels:
+      slo: rpc_server_duration_count_slo
+    record: rpc_server_duration:burnrate1d1h43m
+  - expr: sum by (rpc_method, rpc_service) (rate(rpc_server_duration_count{rpc_connect_rpc_error!=""}[4d6h51m]))
+      / sum by (rpc_method, rpc_service) (rate(rpc_server_duration_count[4d6h51m]))
+    labels:
+      slo: rpc_server_duration_count_slo
+    record: rpc_server_duration:burnrate4d6h51m
+  - alert: ErrorBudgetBurn
+    expr: rpc_server_duration:burnrate5m{slo="rpc_server_duration_count_slo"} > (14
+      * (1-0.99)) and rpc_server_duration:burnrate1h4m{slo="rpc_server_duration_count_slo"}
+      > (14 * (1-0.99))
+    for: 2m
+    labels:
+      long: 1h4m
+      severity: critical
+      short: 5m
+      slo: rpc_server_duration_count_slo
+  - alert: ErrorBudgetBurn
+    expr: rpc_server_duration:burnrate32m{slo="rpc_server_duration_count_slo"} > (7
+      * (1-0.99)) and rpc_server_duration:burnrate6h26m{slo="rpc_server_duration_count_slo"}
+      > (7 * (1-0.99))
+    for: 16m
+    labels:
+      long: 6h26m
+      severity: critical
+      short: 32m
+      slo: rpc_server_duration_count_slo
+  - alert: ErrorBudgetBurn
+    expr: rpc_server_duration:burnrate2h9m{slo="rpc_server_duration_count_slo"} >
+      (2 * (1-0.99)) and rpc_server_duration:burnrate1d1h43m{slo="rpc_server_duration_count_slo"}
+      > (2 * (1-0.99))
+    for: 1h4m
+    labels:
+      long: 1d1h43m
+      severity: warning
+      short: 2h9m
+      slo: rpc_server_duration_count_slo
+  - alert: ErrorBudgetBurn
+    expr: rpc_server_duration:burnrate6h26m{slo="rpc_server_duration_count_slo"} >
+      (1 * (1-0.99)) and rpc_server_duration:burnrate4d6h51m{slo="rpc_server_duration_count_slo"}
+      > (1 * (1-0.99))
+    for: 3h13m
+    labels:
+      long: 4d6h51m
+      severity: warning
+      short: 6h26m
+      slo: rpc_server_duration_count_slo
